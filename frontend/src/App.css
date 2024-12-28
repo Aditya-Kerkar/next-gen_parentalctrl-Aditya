@@ -1,0 +1,213 @@
+.App {
+  text-align: center;
+}
+
+/* Font styling */
+.afacad-flux {
+  font-family: "Afacad Flux", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Styling the input box for BlockList */
+input {
+  flex: 1; /* Make input fill available space */
+  padding: 10px;
+  font-size: 16px;
+  font-family: "Afacad Flux", sans-serif;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  color: #333;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  margin-right: 10px; /* Space between input and button */
+}
+h1 {
+  color: #06402b;
+  font-weight: 800;
+}
+input:focus {
+  border-color: #06402b;
+  box-shadow: 0 0 8px #06402b;
+  background-color: #fff;
+}
+
+/* Styling the button */
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-family: "Afacad Flux", sans-serif;
+  border: none;
+  border-radius: 8px;
+  background-color: #06402b;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: #06402b;
+  transform: scale(1.05);
+}
+
+button:active {
+  background-color: #06402b;
+}
+
+/* Container styling */
+.BlockList-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 95vw; /* Makes the container cover almost the full width */
+  margin: 20px auto;
+}
+
+/* Adjust the form layout to position button beside input */
+.BlockList-container form {
+  display: flex;
+  justify-content: center;
+  width: 100%; /* Ensure the form takes the full width */
+  max-width: 900px;
+}
+
+/* Blocked Sites List */
+.BlockedSites-list {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each Blocked Site Card */
+.BlockedSite-card {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+}
+
+.BlockedSite-card p {
+  margin: 0;
+  font-size: 16px;
+  font-family: "Afacad Flux", sans-serif;
+}
+
+.copy-button {
+  padding: 5px 10px;
+  font-size: 14px;
+  font-family: "Afacad Flux", sans-serif;
+  border: none;
+  border-radius: 6px;
+  background-color: #06402b;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.copy-button:hover {
+  background-color: #06402b;
+}
+
+.copy-button:active {
+  background-color: #06402b;
+}
+
+/* Container for the History List */
+.HistoryList-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between cards */
+  width: 96%; /* Full width */
+  padding: 20px; /* Add padding to the container */
+}
+
+/* Each History Item Card */
+.HistoryItem-card {
+  display: flex;
+  justify-content: space-between; /* Align items left and right */
+  /* Center items vertically */
+  background-color: #ffffff;
+  padding: 15px; /* Padding inside the card */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1),  /* Shadow effect at the top */
+              0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for the card */
+  width: 100%; /* Full width of the container */
+}
+
+/* Styling for URL */
+.HistoryItem-url {
+  font-size: 16px;
+  font-family: "Afacad Flux", sans-serif; /* Use the same font */
+}
+
+/* Styling for Timestamp */
+.HistoryItem-timestamp {
+  font-size: 14px; /* Slightly smaller for timestamp */
+  color: #888; /* Grey color for timestamp */
+}
+
+.DashboardHeader {
+  display: flex; /* Aligns items in a row */
+  align-items: center; /* Center align vertically */
+}
+
+.DashboardImage {
+  border-radius: 10px;
+  width: 50px; /* Adjust width as needed */
+  height: auto; /* Maintain aspect ratio */
+  margin-right: 10px; /* Space between image and title */
+}
+
+.DashboardTitle {
+  font-size: 24px; /* Adjust font size as needed */
+  margin: 0; /* Remove default margin */
+}
+
+/* Other App styles */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
