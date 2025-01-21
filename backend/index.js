@@ -20,13 +20,47 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS browsing_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT,
-    timestamp TEXT
-  )`);
+    timestamp TEXT,
+    category TEXT
+  )`, (err) => { if (err) { 
+    console.error('Error creating browsing_history table:', err.message); 
+  }
+  });
   db.run(`CREATE TABLE IF NOT EXISTS blocked_sites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT
-  )`);
+  )`, (err) => { if (err) { 
+    console.error('Error creating blocked_sites table:', err.message); 
+  } }); 
 });
+
+// Helper function to fetch category from the API 
+const fetchCategory = async (url) => {
+  try {
+    const response = await fetch(`https://website-categorization.whoisxmlapi.com/api/v3?apiKey=at_7kYH5NTsKWjEsphFJ0ZpZdwhSsbp5&url=${url}`);
+    const data = await response.json();
+    
+    // Log the entire API response
+    console.log('API Response:', data);
+    
+    // Ensure the response has categories and it's an array with at least one element
+    if (data && data.categories && data.categories.length > 0) {
+      // Find the category with the highest confidence value
+      const highestConfidenceCategory = data.categories.reduce((highestCategory, currentCategory) => {
+        return currentCategory.confidence > highestCategory.confidence ? currentCategory : highestCategory;
+      });
+
+      return highestConfidenceCategory.name;
+    } else {
+      return 'Uncategorized'; // Return a default value if no categories are found
+    }
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    return 'Unknown';
+  }
+};
+
+
 
 // Get browsing history
 app.get('/api/history', (req, res) => {
@@ -62,17 +96,33 @@ app.post('/api/block-site', (req, res) => {
   });
 });
 
+
 // Add to browsing history
-app.post('/api/track', (req, res) => {
+app.post('/api/track', async (req, res) => {
   const { url, timestamp } = req.body;
-  db.run('INSERT INTO browsing_history (url, timestamp) VALUES (?, ?)', [url, timestamp], (err) => {
+
+  // Unnecessary URLs to be filtered out
+  const unnecessaryUrls = ['http://localhost:3000/', 'chrome://newtab/'];
+
+  // Check if the URL is unnecessary
+  if (unnecessaryUrls.includes(url)) {
+    return res.status(400).json({ message: 'Unnecessary URL' });
+  }
+
+  const category = await fetchCategory(url);
+  
+  db.run('INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)', [url, timestamp, category], function(err) {
     if (err) {
+      console.error('Error inserting into browsing_history:', err.message);
       res.status(500).json({ error: err.message });
     } else {
+      console.log(`Row inserted with ID: ${this.lastID}`);
       res.status(200).send();
     }
   });
 });
+
+
 
 // Start the server
 app.listen(5000, () => {
