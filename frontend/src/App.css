@@ -10,6 +10,84 @@
   font-style: normal;
 }
 
+.logo {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.header {
+  background-color: #fff;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  list-style-type: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+nav,
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+nav {
+  justify-content: space-between;
+  align-items: center;
+  height: 6.5vh;
+  padding: 0 5rem;
+
+  background-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-links {
+  gap: 2rem;
+  list-style: none;
+  font-size: 1.0rem;
+  font-weight: bold;
+  padding-right: 2.5rem;
+  margin: 0;
+}
+
+#desktop-nav {
+  position: fixed;
+  top: 0;
+  width: 95%;
+  background-color: white; 
+  color: black; 
+  transition: all 0.3s ease-in-out; 
+  z-index: 1000; 
+  box-shadow: none;
+}
+
+
+#desktop-nav.scrolled {
+  background-color: #06402b; 
+  color: white; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+
+#desktop-nav a {
+  color: inherit; 
+  text-decoration: none;
+}
+
+#desktop-nav.scrolled a:hover {
+  color: lightgray; 
+}
+
 /* Styling the input box for BlockList */
 input {
   flex: 1; /* Make input fill available space */
@@ -75,6 +153,7 @@ button:active {
   justify-content: center;
   width: 100%; /* Ensure the form takes the full width */
   max-width: 900px;
+  margin-top: 5vh;
 }
 
 /* Blocked Sites List */
