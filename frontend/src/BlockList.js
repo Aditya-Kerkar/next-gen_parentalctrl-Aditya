@@ -14,6 +14,10 @@ const BlockList = ({ blockedSites, newBlockedSite, setNewBlockedSite, handleBloc
       {/* <h2>Blocked Sites</h2> */}
 
       {/* Input Form */}
+      <div className="logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/block-brick.png" alt="Shield Check Icon" className="icon" />
+          <h3>Block List</h3>
+        </div>
       <form onSubmit={(e) => { e.preventDefault(); handleBlockSite(); }}>
         <input
           type="text"

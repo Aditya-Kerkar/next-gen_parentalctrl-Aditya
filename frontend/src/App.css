@@ -60,6 +60,18 @@ nav {
   margin: 0;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo .icon {
+  width: 24px; /* Adjust the size as needed */
+  height: 24px;
+  margin-right: 8px; /* Adjust the spacing as needed */
+}
+
+
 #desktop-nav {
   position: fixed;
   top: 0;
@@ -145,6 +157,7 @@ button:active {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 95vw; /* Makes the container cover almost the full width */
   margin: 20px auto;
+  margin-top: 7.5vh;
 }
 
 /* Adjust the form layout to position button beside input */
@@ -153,7 +166,7 @@ button:active {
   justify-content: center;
   width: 100%; /* Ensure the form takes the full width */
   max-width: 900px;
-  margin-top: 5vh;
+  
 }
 
 /* Blocked Sites List */
@@ -164,6 +177,7 @@ button:active {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  
 }
 
 /* Each Blocked Site Card */
@@ -176,6 +190,7 @@ button:active {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   gap: 10px;
+  
 }
 
 .BlockedSite-card p {
@@ -227,10 +242,16 @@ button:active {
 }
 
 /* Styling for URL */
+
 .HistoryItem-url {
   font-size: 16px;
   font-family: "Afacad Flux", sans-serif; /* Use the same font */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Display ellipsis for overflow text */
+  max-width: 70%; /* Adjust as needed */
 }
+
 
 /* Styling for Timestamp */
 .HistoryItem-timestamp {

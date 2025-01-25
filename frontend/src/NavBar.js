@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -20,7 +19,10 @@ function Header() {
   return (
     <>
       <nav id="desktop-nav" className={isScrolled ? 'scrolled' : ''}>
-        <div className="logo">Next-Gen Parental Ctrl</div>
+        <div className="logo">
+          <img src="/shield-check.png" alt="Shield Check Icon" className="icon" />
+          Next-Gen Parental Ctrl
+        </div>
         <ul className="nav-links">
           <li><a href="#about">Dashboard</a></li>
           <li><a href="#analytics">Analytics</a></li>
