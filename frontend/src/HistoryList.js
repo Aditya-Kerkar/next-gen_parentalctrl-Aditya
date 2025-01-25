@@ -14,15 +14,17 @@ const formatTimestamp = (timestamp) => {
 
 const HistoryList = ({ browsingHistory }) => {
   return (
-    <div >
+    <div>
       <div className="logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/time-past.png" alt="Shield Check Icon" className="icon" />
-          <h3>Web Activity Log</h3>
-        </div>
+        <img src="/time-past.png" alt="Shield Check Icon" className="icon" />
+        <h3>Web Activity Log</h3>
+      </div>
       <div className="HistoryList-container">
         {browsingHistory.map((history, index) => (
           <div key={index} className="HistoryItem-card">
-            <div className="HistoryItem-url" lines={1}><b>URL</b> : {history.url}</div>
+            <div className="HistoryItem-url" lines={1}>
+              <b>URL<div className="category-badge">{history.category}</div></b> : {history.url}
+            </div>
             <div className="HistoryItem-timestamp">{formatTimestamp(history.timestamp)}</div>
           </div>
         ))}

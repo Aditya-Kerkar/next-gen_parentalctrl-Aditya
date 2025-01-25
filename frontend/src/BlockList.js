@@ -14,9 +14,9 @@ const BlockList = ({ blockedSites, newBlockedSite, setNewBlockedSite, handleBloc
       {/* <h2>Blocked Sites</h2> */}
 
       {/* Input Form */}
-      <div className="logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: "20px"}}>
           <img src="/block-brick.png" alt="Shield Check Icon" className="icon" />
-          <h3>Block List</h3>
+          <h3 style={{ color: "white"}}>Block List</h3>
         </div>
       <form onSubmit={(e) => { e.preventDefault(); handleBlockSite(); }}>
         <input
@@ -25,7 +25,8 @@ const BlockList = ({ blockedSites, newBlockedSite, setNewBlockedSite, handleBloc
           onChange={(e) => setNewBlockedSite(e.target.value)}
           placeholder="Block website"
         />
-        <button type="submit">Block Site</button>
+        <button type="submit"><b>BLOCK</b></button>
+
       </form>
 
       {/* Blocked Sites Cards */}

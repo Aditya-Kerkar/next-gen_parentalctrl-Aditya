@@ -61,11 +61,47 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["blocking"]
 );
 
-// Additional tab blocking
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+// Listen for tab updates to track browsing history
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if (changeInfo.status === 'complete' && tab.url) {
+    // Check if URL is blocked first
     if (isUrlBlocked(tab.url)) {
       chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });
+      return;
+    }
+
+    // Exclude unnecessary URLs
+    const unnecessaryUrls = [
+      'chrome://', 
+      'chrome-extension://', 
+      'about:', 
+      'file://', 
+      'localhost:'
+    ];
+
+    // Only track meaningful URLs
+    if (!unnecessaryUrls.some(url => tab.url.includes(url))) {
+      const data = {
+        url: tab.url,
+        timestamp: new Date().toISOString()
+      };
+
+      // Send browsing data to backend
+      fetch(`${BACKEND_URL}/api/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log(`Tracked: ${tab.url}`);
+        } else {
+          console.error('Failed to track URL:', tab.url);
+        }
+      })
+      .catch(error => {
+        console.error('Error tracking URL:', error);
+      });
     }
   }
 });

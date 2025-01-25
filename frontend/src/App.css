@@ -131,14 +131,14 @@ button {
   font-family: "Afacad Flux", sans-serif;
   border: none;
   border-radius: 8px;
-  background-color: #06402b;
-  color: white;
+  background-color: #f9f9f9;
+  color: #06402b;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #06402b;
+  background-color: #f9f9f9;
   transform: scale(1.05);
 }
 
@@ -152,7 +152,7 @@ button:active {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background-color: #f0f0f0;
+  background-color: #06402b;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 95vw; /* Makes the container cover almost the full width */
@@ -253,10 +253,22 @@ button:active {
 }
 
 
+
 /* Styling for Timestamp */
 .HistoryItem-timestamp {
   font-size: 14px; /* Slightly smaller for timestamp */
   color: #888; /* Grey color for timestamp */
+}
+
+/* Styling for the Category Badge */
+.category-badge {
+  display: inline-block; /* Ensure the badge is inline with the text */
+  background-color: #06402b; /* Background color */
+  color: #ffffff; /* Text color */
+  padding: 2px 8px; /* Padding inside the badge */
+  border-radius: 12px; /* Rounded edges */
+  font-size: 14px; /* Font size */
+  margin-left: 5px; /* Space between the badge and the text */
 }
 
 .DashboardHeader {
