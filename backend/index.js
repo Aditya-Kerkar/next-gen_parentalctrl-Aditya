@@ -110,18 +110,32 @@ app.post('/api/track', async (req, res) => {
   }
 
   const category = await fetchCategory(url);
-  
-  db.run('INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)', [url, timestamp, category], function(err) {
-    if (err) {
-      console.error('Error inserting into browsing_history:', err.message);
-      res.status(500).json({ error: err.message });
-    } else {
-      console.log(`Row inserted with ID: ${this.lastID}`);
-      res.status(200).send();
-    }
-  });
-});
 
+  // Check if the category is "Sensitive Topics"
+  if (category === 'Sensitive Topics') {
+    // Store the URL with "Sensitive Topics" category in browsing_history
+    db.run('INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)', [url, timestamp, category], function(err) {
+      if (err) {
+        console.error('Error inserting into browsing_history:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log(`Sensitive Topic URL inserted with ID: ${this.lastID}`);
+      // Block the site by redirecting
+      return res.status(200).json({ message: 'Sensitive Topic Detected' });
+    });
+  } else {
+    // Store the URL in browsing_history
+    db.run('INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)', [url, timestamp, category], function(err) {
+      if (err) {
+        console.error('Error inserting into browsing_history:', err.message);
+        res.status(500).json({ error: err.message });
+      } else {
+        console.log(`Row inserted with ID: ${this.lastID}`);
+        res.status(200).send();
+      }
+    });
+  }
+});
 
 
 // Start the server

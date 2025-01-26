@@ -20,7 +20,7 @@ function Header() {
     <>
       <nav id="desktop-nav" className={isScrolled ? 'scrolled' : ''}>
         <div className="logo">
-          <img src="/shield-check.png" alt="Shield Check Icon" className="icon" />
+          <img src={isScrolled ? "/shield-check-white.png" : "/shield-check.png"} alt="Shield Check Icon" className="icon" />
           Next-Gen Parental Ctrl
         </div>
         <ul className="nav-links">

@@ -92,11 +92,13 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-      .then(response => {
-        if (response.ok) {
-          console.log(`Tracked: ${tab.url}`);
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'Sensitive Topic Detected') {
+          // Block sensitive topics
+          chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });
         } else {
-          console.error('Failed to track URL:', tab.url);
+          console.log(`Tracked: ${tab.url}`);
         }
       })
       .catch(error => {

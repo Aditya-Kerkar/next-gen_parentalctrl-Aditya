@@ -9,7 +9,7 @@ const formatTimestamp = (timestamp) => {
   const hours = String(date.getHours()).padStart(2, '0'); // Get hours and pad with zero
   const minutes = String(date.getMinutes()).padStart(2, '0'); // Get minutes and pad with zero
 
-  return `${day}-${month}-${year} ${hours}:${minutes}`; // Return formatted string
+  return `Date : ${day}-${month}-${year} Time : ${hours}:${minutes}`; // Return formatted string
 };
 
 const HistoryList = ({ browsingHistory }) => {
@@ -23,9 +23,9 @@ const HistoryList = ({ browsingHistory }) => {
         {browsingHistory.map((history, index) => (
           <div key={index} className="HistoryItem-card">
             <div className="HistoryItem-url" lines={1}>
-              <b>URL<div className="category-badge">{history.category}</div></b> : {history.url}
+            <b>URL <div className={`category-badge ${history.category === 'Sensitive Topics' ? 'sensitive' : ''}`}>{history.category}</div> </b>: {history.url} 
             </div>
-            <div className="HistoryItem-timestamp">{formatTimestamp(history.timestamp)}</div>
+            <div className="HistoryItem-timestamp"><b>{formatTimestamp(history.timestamp)}</b></div>
           </div>
         ))}
       </div>

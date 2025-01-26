@@ -257,7 +257,7 @@ button:active {
 /* Styling for Timestamp */
 .HistoryItem-timestamp {
   font-size: 14px; /* Slightly smaller for timestamp */
-  color: #888; /* Grey color for timestamp */
+  color: #06402b; /* Grey color for timestamp */
 }
 
 /* Styling for the Category Badge */
@@ -269,6 +269,11 @@ button:active {
   border-radius: 12px; /* Rounded edges */
   font-size: 14px; /* Font size */
   margin-left: 5px; /* Space between the badge and the text */
+}
+
+/* Styling for Sensitive Topics */
+.sensitive {
+  background-color: #ff0000; /* Red background for sensitive topics */
 }
 
 .DashboardHeader {
