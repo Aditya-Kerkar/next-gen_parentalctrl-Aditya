@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,9 +25,10 @@ function Header() {
           Next-Gen Parental Ctrl
         </div>
         <ul className="nav-links">
-          <li><a href="#about">Dashboard</a></li>
+          <li><Link to="/">Dashboard</Link></li>
           <li><a href="#analytics">Analytics</a></li>
           <li><a href="#gamification">Gamification</a></li>
+          <li><Link to="/requests">Requests</Link></li>
         </ul>
       </nav>
     </>

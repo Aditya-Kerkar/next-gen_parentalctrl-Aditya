@@ -271,6 +271,16 @@ button:active {
   margin-left: 5px; /* Space between the badge and the text */
 }
 
+.req-badge {
+  display: inline-block; /* Ensure the badge is inline with the text */
+  background-color: #06402b; /* Background color */
+  color: #ffffff; /* Text color */
+  padding: 6px 12px; /* Padding inside the badge */
+  border-radius: 8px; /* Rounded edges */
+  font-size: 15px; /* Font size */ /* Space between the badge and the text */
+  font-weight: bold;
+}
+
 /* Styling for Sensitive Topics */
 .sensitive {
   background-color: #ff0000; /* Red background for sensitive topics */
@@ -292,6 +302,102 @@ button:active {
   font-size: 24px; /* Adjust font size as needed */
   margin: 0; /* Remove default margin */
 }
+
+/* Styles for the Requests Page */
+.requests-page {
+  margin-top: 50px;
+  padding: 16px;
+}
+
+.requests-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.requests-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between cards */
+  margin: 0 -10px; /* Ensure cards cover the entire page width */
+}
+
+.request-card {
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1), /* Shadow at the top */
+              0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow at the bottom */
+  margin: 0 10px; /* 10px margin around the cards */
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.request-url {
+  font-weight: bold;
+}
+
+.request-reason {
+  color: #000000;
+  margin-top: 8px;
+}
+
+.request-timestamp {
+  font-size: 14px;
+  color: #06402b;
+  margin-top: 4px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: start; /* Center buttons horizontally */
+  gap: 8px;
+}
+
+.approve-button,
+.decline-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.approve-button {
+  background-color: #28a745;
+}
+
+.approve-button:hover {
+  background-color: #218838;
+}
+
+.decline-button {
+  background-color: #dc3545;
+}
+
+.decline-button:hover {
+  background-color: #c82333;
+}
+
+.request-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #ddd;
+  color: #555;
+}
+
+.no-requests {
+  text-align: center;
+  color: #888;
+}
+
 
 /* Other App styles */
 .App-logo {

@@ -54,7 +54,9 @@ chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
     if (isUrlBlocked(details.url)) {
       console.log(`Blocking: ${details.url}`);
-      return { redirectUrl: chrome.runtime.getURL('blocked.html') };
+      return { 
+        redirectUrl: chrome.runtime.getURL('blocked.html') + '?blocked=' + encodeURIComponent(details.url)
+      };
     }
   },
   { urls: ["<all_urls>"] },

@@ -1,17 +1,24 @@
 import React from 'react';
-import Dashboard from './Dashboard';
-import NavBar from './NavBar'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './NavBar';
+import Dashboard from './Dashboard'; // Your existing dashboard component
+// import Analytics from './components/Analytics'; // Your existing analytics component
+// import Gamification from './components/Gamification'; // Your existing gamification component
+import RequestsPage from './RequestsPage';
 
 function App() {
   return (
-    <div className="App">
-      {/* <div className="DashboardHeader">
-      <img src={`${process.env.PUBLIC_URL}/Designer.png`} alt="Parental Control Icon" className="DashboardImage" />
-      <h1 className="DashboardTitle">Parental Control Dashboard</h1>
-      </div> */}
-      <NavBar />
-      <Dashboard />
-    </div>
+    <Router>
+      <div>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          {/* <Route path="/analytics" element={<Analytics />} />
+          <Route path="/gamification" element={<Gamification />} /> */}
+          <Route path="/requests" element={<RequestsPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

@@ -32,6 +32,17 @@ db.serialize(() => {
   )`, (err) => { if (err) { 
     console.error('Error creating blocked_sites table:', err.message); 
   } }); 
+  db.run(`CREATE TABLE IF NOT EXISTS revocation_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+  )`, (err) => {
+    if (err) {
+      console.error('Error creating revocation_requests table:', err.message);
+    }
+  });
 });
 
 // Helper function to fetch category from the API 
@@ -135,6 +146,64 @@ app.post('/api/track', async (req, res) => {
       }
     });
   }
+});
+
+app.post('/api/revocation-request', (req, res) => {
+  const { url, description } = req.body;
+  db.run('INSERT INTO revocation_requests (url, description) VALUES (?, ?)',
+    [url, description],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json({ id: this.lastID });
+      }
+    }
+  );
+});
+
+app.get('/api/revocation-requests', (req, res) => {
+  db.all('SELECT * FROM revocation_requests ORDER BY timestamp DESC', (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.put('/api/revocation-request/:id', (req, res) => {
+  const { status, approved } = req.body;
+  const { id } = req.params;
+  
+  db.serialize(() => {
+    db.run('UPDATE revocation_requests SET status = ? WHERE id = ?',
+      [status, id],
+      (err) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        
+        if (approved) {
+          // If approved, remove from blocked_sites
+          db.get('SELECT url FROM revocation_requests WHERE id = ?', [id], (err, row) => {
+            if (err || !row) {
+              return res.status(500).json({ error: err ? err.message : 'Request not found' });
+            }
+            
+            db.run('DELETE FROM blocked_sites WHERE url = ?', [row.url], (err) => {
+              if (err) {
+                return res.status(500).json({ error: err.message });
+              }
+              res.status(200).json({ message: 'Request processed successfully' });
+            });
+          });
+        } else {
+          res.status(200).json({ message: 'Request processed successfully' });
+        }
+      }
+    );
+  });
 });
 
 

@@ -4,32 +4,195 @@
     <meta charset="UTF-8">
     <title>Access Blocked</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Segoe UI, Tahoma, 'Geneva', Verdana, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            padding: 20px;
         }
+
         .blocked-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .blocked-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #d9534f);
+        }
+
+        .icon-container {
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         h1 {
             color: #d9534f;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .status-text {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .revoke-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .form-title {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-title::before {
+            content: '↺';
+            font-size: 1.2em;
+            color: #5bc0de;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #5bc0de;
+            box-shadow: 0 0 0 3px rgba(91, 192, 222, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #adb5bd;
+        }
+
+        button {
+            background: linear-gradient(135deg, #5bc0de 0%, #4ca8c5 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(91, 192, 222, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 480px) {
+            .blocked-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .revoke-form {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="blocked-container">
-        <img src="./cancel.gif" alt="LinkedIn icon" width="120" height="120"/>
-        <h1>ACCESS PROHIBITED</h1>
-        <p>The access to this website has been blocked by parental controls.</p>
+        <div class="icon-container">
+            <img src="./cancel.gif" alt="Access Blocked Icon" width="120" height="120"/>
+        </div>
+        <h1><b>ACCESS PROHIBITED</b></h1>
+        <p class="status-text">This website has been blocked by parental controls.<br>You can request access by submitting the form below.</p>
+        
+        <div class="revoke-form">
+            <h3 class="form-title">Request Access</h3>
+            <textarea 
+                id="description" 
+                placeholder="Please explain why you need access to this website. Be specific about your reasons and how you plan to use this website responsibly..."
+            ></textarea>
+            <button id="submit-request">Submit Access Request</button>
+            <div id="message" class="message"></div>
+        </div>
     </div>
+    <script src="blocked.js"></script>
 </body>
 </html>

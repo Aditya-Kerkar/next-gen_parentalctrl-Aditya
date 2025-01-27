@@ -10,16 +10,23 @@
     "tabs",
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "<all_urls>"
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_security_policy": "script-src 'self' http://localhost:5000; object-src 'self'",
   "icons": {
     "48": "icons/icon.png"
   },
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "web_accessible_resources": [
+    "blocked.html",
+    "blocked.js",
+    "cancel.gif"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  }
 }
