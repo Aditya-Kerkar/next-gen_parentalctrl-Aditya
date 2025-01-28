@@ -1,4 +1,5 @@
 const BACKEND_URL = 'http://localhost:5000';
+const MALICIOUS_API_URL = 'http://localhost:5001/predict';
 let blockedSites = [];
 
 // Enhanced domain extraction and matching
@@ -45,6 +46,31 @@ const isUrlBlocked = (url) => {
   }
 };
 
+const checkUrlSafety = async (url) => {
+  try {
+    // Skip checking for certain URLs
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
+      return null;
+    }
+
+    const response = await fetch(MALICIOUS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.result_str;
+  } catch (error) {
+    console.error('Error checking URL safety:', error);
+    return null;
+  }
+};
+
 // Initial fetch and periodic refresh
 fetchBlockedSites();
 setInterval(fetchBlockedSites, 5 * 60 * 1000);
@@ -64,8 +90,14 @@ chrome.webRequest.onBeforeRequest.addListener(
 );
 
 // Listen for tab updates to track browsing history
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
   if (changeInfo.status === 'complete' && tab.url) {
+
+    const result = await checkUrlSafety(tab.url);
+    if (result) {
+      chrome.tabs.sendMessage(tabId, { type: 'urlSafetyCheck', result });
+    }
+
     // Check if URL is blocked first
     if (isUrlBlocked(tab.url)) {
       chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });

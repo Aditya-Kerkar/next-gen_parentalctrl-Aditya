@@ -13,7 +13,7 @@
     "scripting",
     "<all_urls>"
   ],
-  "content_security_policy": "script-src 'self' http://localhost:5000; object-src 'self'",
+  "content_security_policy": "script-src 'self' http://localhost:5000 http://localhost:5001; object-src 'self'",
   "icons": {
     "48": "icons/icon.png"
   },
@@ -23,10 +23,20 @@
   "web_accessible_resources": [
     "blocked.html",
     "blocked.js",
-    "cancel.gif"
+    "cancel.gif",
+    "popup.html",
+    "diamond-exclamation.png"
   ],
   "background": {
     "scripts": ["background.js"],
     "persistent": true
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "all_frames": false,
+      "run_at": "document_end"
+    }
+  ]
 }
