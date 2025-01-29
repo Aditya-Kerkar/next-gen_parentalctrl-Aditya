@@ -1,5 +1,6 @@
 const BACKEND_URL = 'http://localhost:5000';
 const MALICIOUS_API_URL = 'http://localhost:5001/predict';
+const CYBERBULLYING_API_URL = 'http://localhost:5002/predict';
 let blockedSites = [];
 
 // Enhanced domain extraction and matching
@@ -71,6 +72,36 @@ const checkUrlSafety = async (url) => {
   }
 };
 
+
+const checkContentForCyberbullying = async (content) => {
+  try {
+    const requestData = { text: content };
+    console.log('Sending request to cyberbullying API:', requestData);
+
+    const response = await fetch(CYBERBULLYING_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Received response from cyberbullying API:', data);
+    return data;
+  } catch (error) {
+    console.error('Error checking content for cyberbullying:', error);
+    return null;
+  }
+};
+
+const extractPageContent = () => {
+  return document.body.innerText; // Extracting the visible text content of the page
+};
+
+
 // Initial fetch and periodic refresh
 fetchBlockedSites();
 setInterval(fetchBlockedSites, 5 * 60 * 1000);
@@ -92,6 +123,24 @@ chrome.webRequest.onBeforeRequest.addListener(
 // Listen for tab updates to track browsing history
 chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
   if (changeInfo.status === 'complete' && tab.url) {
+
+    setTimeout(async () => {
+      // Get the page content
+      chrome.tabs.sendMessage(tabId, { type: 'getPageContent' }, async function(content) {
+        if (content) {
+          const resultc = await checkContentForCyberbullying(content);
+          if (resultc && resultc.is_cyberbullying !== undefined) {
+            const isSafe = !resultc.is_cyberbullying;
+            const message = isSafe ? 'Content appears safe.' : 'Potential cyberbullying detected.';
+            chrome.tabs.sendMessage(tabId, { 
+              type: 'cyberbullyingDetected', 
+              result: isSafe,
+              message: message 
+            });
+          }
+        }
+      });
+    }, 9000);
 
     const result = await checkUrlSafety(tab.url);
     if (result) {
