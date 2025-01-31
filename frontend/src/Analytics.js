@@ -29,7 +29,7 @@ const Analytics = () => {
       })
       .catch(error => console.error(`Error fetching ${period} analytics:`, error));
   };
-  
+
   const aggregateVisitData = (data) => {
     const websiteVisitMap = new Map();
     data.forEach(record => {
@@ -84,11 +84,11 @@ const Analytics = () => {
       {/* Statistics Panel */}
 <div className="statistics-panel">
   <div className="stat-card">
-    <h4>Total Visits</h4>
+    <h4>Total Websites Visited</h4>
     <p>{statistics[activeTab]?.totalVisits || 0}</p>
   </div>
   <div className="stat-card">
-    <h4>Unique Sites</h4>
+    <h4>Unique Websites</h4>
     <p>{statistics[activeTab]?.uniqueSites || 0}</p>
   </div>
 </div>
@@ -100,7 +100,7 @@ const Analytics = () => {
 
       {/* Top Websites List */}
       <div className="top-sites">
-        <h3>Top Websites</h3>
+        <h3>Top 10 Websites</h3>
         <ul>
         {analyticsData[activeTab]
   .sort((a, b) => b.visits - a.visits)  // Sort by visits (highest to lowest)

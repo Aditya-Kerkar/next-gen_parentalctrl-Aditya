@@ -16,14 +16,15 @@ const db = new sqlite3.Database('./db.sqlite');
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS browsing_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url TEXT,
-    timestamp TEXT,
+    url TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,  
     category TEXT
   )`, (err) => { 
     if (err) { 
       console.error('Error creating browsing_history table:', err.message); 
     }
   });
+  
 
   db.run(`CREATE TABLE IF NOT EXISTS blocked_sites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,6 +57,40 @@ const queryDb = (query, params = []) => {
     });
   });
 };
+
+// Get browsing history
+app.get('/api/history', (req, res) => {
+  db.all('SELECT * FROM browsing_history', (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+// Get blocked sites
+app.get('/api/blocked-sites', (req, res) => {
+  db.all('SELECT * FROM blocked_sites', (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+// Block a site
+app.post('/api/block-site', (req, res) => {
+  const { url } = req.body;
+  db.run('INSERT INTO blocked_sites (url) VALUES (?)', [url], (err) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(200).send();
+    }
+  });
+});
 
 // Analytics Route: Get total browsing entries and category breakdown
 app.get('/api/analytics/summary', async (req, res) => {
@@ -108,6 +143,131 @@ app.get('/api/analytics/top-urls', async (req, res) => {
   }
 });
 
+app.post('/api/track', async (req, res) => {
+  const { url, timestamp } = req.body;
+
+  // Convert timestamp to UNIX format (seconds)
+  const unixTimestamp = Math.floor(new Date(timestamp).getTime() / 1000);
+
+  // Unnecessary URLs to be filtered out
+  const unnecessaryUrls = ['http://localhost:3000/', 'chrome://newtab/'];
+
+  if (unnecessaryUrls.includes(url)) {
+    return res.status(400).json({ message: 'Unnecessary URL' });
+  }
+
+  // Fetch category for the URL
+  const category = await fetchCategory(url);
+
+  // Insert data into browsing_history
+  db.run(
+    'INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)',
+    [url, unixTimestamp, category],
+    function (err) {
+      if (err) {
+        console.error('Error inserting into browsing_history:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+
+      console.log(`Row inserted with ID: ${this.lastID}`);
+
+      // If "Sensitive Topics", return special message
+      if (category === 'Sensitive Topics') {
+        return res.status(200).json({ message: 'Sensitive Topic Detected' });
+      }
+
+      res.status(200).json({ message: 'Browsing history added' });
+    }
+  );
+});
+
+
+app.post('/api/revocation-request', (req, res) => {
+  const { url, description } = req.body;
+  db.run('INSERT INTO revocation_requests (url, description) VALUES (?, ?)',
+    [url, description],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json({ id: this.lastID });
+      }
+    }
+  );
+});
+
+app.get('/api/revocation-requests', (req, res) => {
+  db.all('SELECT * FROM revocation_requests ORDER BY timestamp DESC', (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.put('/api/revocation-request/:id', (req, res) => {
+  const { status, approved } = req.body;
+  const { id } = req.params;
+  
+  db.serialize(() => {
+    db.run('UPDATE revocation_requests SET status = ? WHERE id = ?',
+      [status, id],
+      (err) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        
+        if (approved) {
+          // If approved, remove from blocked_sites
+          db.get('SELECT url FROM revocation_requests WHERE id = ?', [id], (err, row) => {
+            if (err || !row) {
+              return res.status(500).json({ error: err ? err.message : 'Request not found' });
+            }
+            
+            db.run('DELETE FROM blocked_sites WHERE url = ?', [row.url], (err) => {
+              if (err) {
+                return res.status(500).json({ error: err.message });
+              }
+              res.status(200).json({ message: 'Request processed successfully' });
+            });
+          });
+        } else {
+          res.status(200).json({ message: 'Request processed successfully' });
+        }
+      }
+    );
+  });
+});
+
+// Helper function to fetch category from the API 
+const fetchCategory = async (url) => {
+  try {
+    const response = await fetch(`https://website-categorization.whoisxmlapi.com/api/v3?apiKey=at_7kYH5NTsKWjEsphFJ0ZpZdwhSsbp5&url=${url}`);
+    const data = await response.json();
+    
+    // Log the entire API response
+    console.log('API Response:', data);
+    
+    // Ensure the response has categories and it's an array with at least one element
+    if (data && data.categories && data.categories.length > 0) {
+      // Find the category with the highest confidence value
+      const highestConfidenceCategory = data.categories.reduce((highestCategory, currentCategory) => {
+        return currentCategory.confidence > highestCategory.confidence ? currentCategory : highestCategory;
+      });
+
+      return highestConfidenceCategory.name;
+    } else {
+      return 'Uncategorized'; // Return a default value if no categories are found
+    }
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    return 'Unknown';
+  }
+};
+
+
+
 // Analytics Route: Get category-wise browsing history
 app.get('/api/analytics/category-history', async (req, res) => {
   try {
@@ -123,6 +283,8 @@ app.get('/api/analytics/category-history', async (req, res) => {
   }
 });
 
+
+
 // Start the server
 app.listen(5000, () => {
   console.log('Backend server running on port 5000');
@@ -132,14 +294,15 @@ const moment = require('moment'); // Ensure moment.js is installed for date hand
 
 const getTimeFilter = (period) => {
   if (period === 'daily') {
-    return "DATE(timestamp, 'unixepoch') = DATE('now', 'localtime')"; // Convert timestamp to local date
+    return "DATE(timestamp, 'unixepoch', 'localtime') = DATE('now', 'localtime')";
   } else if (period === 'weekly') {
-    return "DATE(timestamp, 'unixepoch') >= DATE('now', '-6 days', 'localtime')";
+    return "DATE(timestamp, 'unixepoch', 'localtime') >= DATE('now', '-6 days', 'localtime')";
   } else if (period === 'monthly') {
-    return "strftime('%Y-%m', timestamp, 'unixepoch') = strftime('%Y-%m', 'now', 'localtime')";
+    return "strftime('%Y-%m', timestamp, 'unixepoch', 'localtime') = strftime('%Y-%m', 'now', 'localtime')";
   }
   return null;
 };
+
 
 // Fetch analytics data for daily, weekly, and monthly
 app.get('/api/analytics/:period', async (req, res) => {
@@ -151,7 +314,16 @@ app.get('/api/analytics/:period', async (req, res) => {
   }
 
   try {
-    const visits = await queryDb(`SELECT url FROM browsing_history WHERE ${timeFilter}`);
+    const visits = await queryDb(`SELECT url, timestamp FROM browsing_history WHERE ${timeFilter}`);
+
+    // Debugging: Log results to check timestamps
+    console.log(`Fetched ${period} analytics:`, visits);
+
+    // Convert timestamps to readable format for debugging
+    const formattedData = visits.map(record => ({
+      url: record.url,
+      timestamp: new Date(record.timestamp * 1000).toLocaleString(), // Convert UNIX to readable format
+    }));
 
     // Aggregate total visits and unique sites
     const uniqueSites = new Set(visits.map(record => new URL(record.url).hostname)).size;
@@ -159,7 +331,7 @@ app.get('/api/analytics/:period', async (req, res) => {
     res.json({
       totalVisits: visits.length,
       uniqueSites,
-      data: visits, // Send raw data for frontend processing
+      data: formattedData, // Send formatted timestamps for debugging
     });
   } catch (error) {
     console.error(`Error fetching ${period} analytics:`, error);
