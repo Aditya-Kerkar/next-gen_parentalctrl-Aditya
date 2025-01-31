@@ -5,6 +5,10 @@ const sqlite3 = require('sqlite3').verbose();
 
 // Initialize Express app
 const app = express();
+
+
+
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -211,3 +215,45 @@ app.put('/api/revocation-request/:id', (req, res) => {
 app.listen(5000, () => {
   console.log('Backend server running on port 5000');
 });
+
+app.get('/api/analytics/daily', (req, res) => {
+  const query = `
+    SELECT 
+      strftime('%Y-%m-%d', timestamp) AS day, 
+      url, 
+      COUNT(*) AS visit_count
+    FROM browsing_history
+    GROUP BY day, url
+    ORDER BY day DESC;
+  `;
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching daily data', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+
+app.get('/api/analytics/weekly', (req, res) => {
+  const query = `
+    SELECT 
+      strftime('%Y-%W', timestamp) AS week, 
+      url, 
+      COUNT(*) AS visit_count
+    FROM browsing_history
+    GROUP BY week, url
+    ORDER BY week DESC;
+  `;
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching weekly data', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+

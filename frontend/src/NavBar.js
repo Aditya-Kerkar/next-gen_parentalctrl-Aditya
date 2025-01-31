@@ -26,7 +26,7 @@ function Header() {
         </div>
         <ul className="nav-links">
           <li><Link to="/">Dashboard</Link></li>
-          <li><a href="#analytics">Analytics</a></li>
+          <li><a href="/analytics">Analytics</a></li>
           <li><a href="#gamification">Gamification</a></li>
           <li><Link to="/requests">Requests</Link></li>
         </ul>
