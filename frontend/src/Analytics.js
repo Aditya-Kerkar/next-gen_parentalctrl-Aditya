@@ -1,56 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, Tooltip, Legend, ArcElement } from 'chart.js';
+import { extractDomain } from './utils'; // Helper to extract domain from URLs
 
-// Registering Chart.js components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(Tooltip, Legend, ArcElement);
 
 const Analytics = () => {
   const [dailyAnalytics, setDailyAnalytics] = useState([]);
   const [weeklyAnalytics, setWeeklyAnalytics] = useState([]);
 
-  // Fetch daily analytics data
   useEffect(() => {
     fetch('/api/analytics/daily')
-      .then((response) => response.json())
-      .then((data) => setDailyAnalytics(data))
-      .catch((error) => console.error('Error fetching daily analytics:', error));
-  }, []);
+      .then(response => response.json())
+      .then(data => {
+        const aggregatedData = aggregateTimeSpent(data);
+        console.log('Daily Aggregated Data:', aggregatedData);
+        setDailyAnalytics(aggregatedData);
+      })
+      .catch(error => console.error('Error fetching daily analytics:', error));
 
-  // Fetch weekly analytics data
-  useEffect(() => {
     fetch('/api/analytics/weekly')
-      .then((response) => response.json())
-      .then((data) => setWeeklyAnalytics(data))
-      .catch((error) => console.error('Error fetching weekly analytics:', error));
+      .then(response => response.json())
+      .then(data => {
+        const aggregatedData = aggregateTimeSpent(data);
+        console.log('Weekly Aggregated Data:', aggregatedData);
+        setWeeklyAnalytics(aggregatedData);
+      })
+      .catch(error => console.error('Error fetching weekly analytics:', error));
   }, []);
 
-  // Prepare data for the daily chart
-  const dailyChartData = {
-    labels: dailyAnalytics.map((item) => item.day), // Days as labels
-    datasets: [
-      {
-        label: 'Daily Website Visits',
-        data: dailyAnalytics.map((item) => item.visit_count), // Visit count as data
-        borderColor: 'rgba(75, 192, 192, 1)', // Line color
-        backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill color
-        fill: true, // To fill the area under the line
-      },
-    ],
+  const aggregateTimeSpent = (data) => {
+    const websiteTimeMap = new Map();
+
+    data.forEach((record, index) => {
+      const domain = extractDomain(record.url);
+      const timestamp = new Date(record.timestamp).getTime();
+
+      if (!websiteTimeMap.has(domain)) {
+        websiteTimeMap.set(domain, { timeSpent: 0, lastTimestamp: timestamp });
+      }
+
+      const siteData = websiteTimeMap.get(domain);
+
+      if (index > 0) {
+        siteData.timeSpent += timestamp - siteData.lastTimestamp;
+      }
+
+      siteData.lastTimestamp = timestamp;
+    });
+
+    return Array.from(websiteTimeMap).map(([domain, siteData]) => ({
+      domain,
+      timeSpent: siteData.timeSpent / (1000 * 60), // Time in minutes
+    }));
   };
 
-  // Prepare data for the weekly chart
-  const weeklyChartData = {
-    labels: weeklyAnalytics.map((item) => `Week ${item.week}`), // Week as labels
-    datasets: [
-      {
-        label: 'Weekly Website Visits',
-        data: weeklyAnalytics.map((item) => item.visit_count), // Visit count as data
-        borderColor: 'rgba(153, 102, 255, 1)', // Line color
-        backgroundColor: 'rgba(153, 102, 255, 0.2)', // Fill color
-        fill: true, // To fill the area under the line
-      },
-    ],
+  const generateChartData = (analyticsData) => {
+    const labels = analyticsData.map(item => item.domain);
+    const dataValues = analyticsData.map(item => item.timeSpent);
+
+    console.log('Chart Labels:', labels);
+    console.log('Chart Data Values:', dataValues);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Time Spent (minutes)',
+          data: dataValues,
+          backgroundColor: labels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+          borderWidth: 1,
+        },
+      ],
+    };
   };
 
   return (
@@ -58,36 +80,13 @@ const Analytics = () => {
       <h2>Website Activity Analytics</h2>
 
       <div>
-        <h3>Daily Activity</h3>
-        <Line data={dailyChartData} />
+        <h3>Daily Activity (Pie Chart)</h3>
+        <Pie data={generateChartData(dailyAnalytics)} options={{ maintainAspectRatio: false }} />
       </div>
 
       <div>
-        <h3>Weekly Activity</h3>
-        <Line data={weeklyChartData} />
-      </div>
-
-      <div>
-        <h3>Website Visit Counts</h3>
-        {/* Table to show website visits per day */}
-        <table>
-          <thead>
-            <tr>
-              <th>Website</th>
-              <th>Date</th>
-              <th>Visit Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dailyAnalytics.map((item) => (
-              <tr key={item.day + item.url}>
-                <td>{item.url}</td>
-                <td>{item.day}</td>
-                <td>{item.visit_count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h3>Weekly Activity (Pie Chart)</h3>
+        <Pie data={generateChartData(weeklyAnalytics)} options={{ maintainAspectRatio: false }} />
       </div>
     </div>
   );

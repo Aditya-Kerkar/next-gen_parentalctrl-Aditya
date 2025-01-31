@@ -216,10 +216,11 @@ app.listen(5000, () => {
   console.log('Backend server running on port 5000');
 });
 
+// Daily analytics route
 app.get('/api/analytics/daily', (req, res) => {
   const query = `
     SELECT 
-      strftime('%Y-%m-%d', timestamp) AS day, 
+      date(substr(timestamp, 1, 10)) AS day, 
       url, 
       COUNT(*) AS visit_count
     FROM browsing_history
@@ -236,11 +237,11 @@ app.get('/api/analytics/daily', (req, res) => {
   });
 });
 
-
+// Weekly analytics route
 app.get('/api/analytics/weekly', (req, res) => {
   const query = `
     SELECT 
-      strftime('%Y-%W', timestamp) AS week, 
+      strftime('%Y-%W', date(substr(timestamp, 1, 10))) AS week, 
       url, 
       COUNT(*) AS visit_count
     FROM browsing_history
@@ -256,4 +257,3 @@ app.get('/api/analytics/weekly', (req, res) => {
     res.json(rows);
   });
 });
-
