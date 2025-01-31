@@ -156,30 +156,50 @@ app.post('/api/track', async (req, res) => {
     return res.status(400).json({ message: 'Unnecessary URL' });
   }
 
-  // Fetch category for the URL
-  const category = await fetchCategory(url);
-
-  // Insert data into browsing_history
-  db.run(
-    'INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)',
-    [url, unixTimestamp, category],
-    function (err) {
-      if (err) {
-        console.error('Error inserting into browsing_history:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-
-      console.log(`Row inserted with ID: ${this.lastID}`);
-
-      // If "Sensitive Topics", return special message
-      if (category === 'Sensitive Topics') {
-        return res.status(200).json({ message: 'Sensitive Topic Detected' });
-      }
-
-      res.status(200).json({ message: 'Browsing history added' });
+  // Check if the site is blocked
+  db.get('SELECT * FROM blocked_sites WHERE url = ?', [url], async (err, row) => {
+    if (err) {
+      console.error('Error checking blocked sites:', err.message);
+      return res.status(500).json({ error: err.message });
     }
-  );
+    if (row) {
+      return res.status(403).json({ message: 'This site is blocked' });
+    }
+
+    // Fetch category for the URL
+    const category = await fetchCategory(url);
+
+    // Insert data into browsing_history
+    db.run(
+      'INSERT INTO browsing_history (url, timestamp, category) VALUES (?, ?, ?)',
+      [url, unixTimestamp, category],
+      function (err) {
+        if (err) {
+          console.error('Error inserting into browsing_history:', err.message);
+          return res.status(500).json({ error: err.message });
+        }
+
+        console.log(`Row inserted with ID: ${this.lastID}`);
+
+        // If "Sensitive Topics", block the site
+        if (category === 'Sensitive Topics') {
+          // Insert into blocked_sites
+          db.run('INSERT INTO blocked_sites (url) VALUES (?)', [url], (err) => {
+            if (err) {
+              console.error('Error inserting into blocked_sites:', err.message);
+              return res.status(500).json({ error: err.message });
+            }
+            console.log(`Site blocked: ${url}`);
+            return res.status(200).json({ message: 'Sensitive Topic Detected and Blocked' });
+          });
+        } else {
+          res.status(200).json({ message: 'Browsing history added' });
+        }
+      }
+    );
+  });
 });
+
 
 
 app.post('/api/revocation-request', (req, res) => {
