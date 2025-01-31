@@ -1,74 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, Tooltip, Legend, ArcElement } from 'chart.js';
-import { extractDomain } from './utils'; // Helper to extract domain from URLs
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import './Analytics.css'; // External CSS for styling the layout
 
-ChartJS.register(Tooltip, Legend, ArcElement);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Analytics = () => {
-  const [dailyAnalytics, setDailyAnalytics] = useState([]);
-  const [weeklyAnalytics, setWeeklyAnalytics] = useState([]);
+  const [activeTab, setActiveTab] = useState('daily');
+  const [analyticsData, setAnalyticsData] = useState({ daily: [], weekly: [], monthly: [] });
+  const [statistics, setStatistics] = useState({ totalVisits: 0, uniqueSites: 0 });
 
   useEffect(() => {
-    fetch('/api/analytics/daily')
-      .then(response => response.json())
-      .then(data => {
-        const aggregatedData = aggregateTimeSpent(data);
-        console.log('Daily Aggregated Data:', aggregatedData);
-        setDailyAnalytics(aggregatedData);
-      })
-      .catch(error => console.error('Error fetching daily analytics:', error));
-
-    fetch('/api/analytics/weekly')
-      .then(response => response.json())
-      .then(data => {
-        const aggregatedData = aggregateTimeSpent(data);
-        console.log('Weekly Aggregated Data:', aggregatedData);
-        setWeeklyAnalytics(aggregatedData);
-      })
-      .catch(error => console.error('Error fetching weekly analytics:', error));
+    fetchAnalyticsData('daily');
+    fetchAnalyticsData('weekly');
+    fetchAnalyticsData('monthly');
   }, []);
 
-  const aggregateTimeSpent = (data) => {
-    const websiteTimeMap = new Map();
-
-    data.forEach((record, index) => {
-      const domain = extractDomain(record.url);
-      const timestamp = new Date(record.timestamp).getTime();
-
-      if (!websiteTimeMap.has(domain)) {
-        websiteTimeMap.set(domain, { timeSpent: 0, lastTimestamp: timestamp });
-      }
-
-      const siteData = websiteTimeMap.get(domain);
-
-      if (index > 0) {
-        siteData.timeSpent += timestamp - siteData.lastTimestamp;
-      }
-
-      siteData.lastTimestamp = timestamp;
+  const fetchAnalyticsData = (period) => {
+    fetch(`/api/analytics/${period}`)
+      .then(response => response.json())
+      .then(({ totalVisits, uniqueSites, data }) => {
+        const aggregatedData = aggregateVisitData(data);
+        setAnalyticsData(prevData => ({ ...prevData, [period]: aggregatedData }));
+        setStatistics(prevStats => ({
+          ...prevStats,
+          [period]: { totalVisits, uniqueSites }, // Store stats separately for each period
+        }));
+      })
+      .catch(error => console.error(`Error fetching ${period} analytics:`, error));
+  };
+  
+  const aggregateVisitData = (data) => {
+    const websiteVisitMap = new Map();
+    data.forEach(record => {
+      const domain = new URL(record.url).hostname;
+      websiteVisitMap.set(domain, (websiteVisitMap.get(domain) || 0) + 1);
     });
+    return Array.from(websiteVisitMap).map(([domain, visits]) => ({ domain, visits }));
+  };
 
-    return Array.from(websiteTimeMap).map(([domain, siteData]) => ({
-      domain,
-      timeSpent: siteData.timeSpent / (1000 * 60), // Time in minutes
-    }));
+  const calculateStatistics = (data) => {
+    const uniqueSites = new Set(data.map(record => new URL(record.url).hostname)).size;
+    setStatistics({
+      totalVisits: data.length,
+      uniqueSites,
+    });
   };
 
   const generateChartData = (analyticsData) => {
     const labels = analyticsData.map(item => item.domain);
-    const dataValues = analyticsData.map(item => item.timeSpent);
-
-    console.log('Chart Labels:', labels);
-    console.log('Chart Data Values:', dataValues);
+    const dataValues = analyticsData.map(item => item.visits);
 
     return {
       labels,
       datasets: [
         {
-          label: 'Time Spent (minutes)',
+          label: 'Number of Visits',
           data: dataValues,
-          backgroundColor: labels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderWidth: 1,
         },
       ],
@@ -76,17 +65,53 @@ const Analytics = () => {
   };
 
   return (
-    <div>
+    <div className="analytics-container">
       <h2>Website Activity Analytics</h2>
 
-      <div>
-        <h3>Daily Activity (Pie Chart)</h3>
-        <Pie data={generateChartData(dailyAnalytics)} options={{ maintainAspectRatio: false }} />
+      {/* Navigation Tabs */}
+      <div className="tabs">
+        {['daily', 'weekly', 'monthly'].map(period => (
+          <button
+            key={period}
+            className={activeTab === period ? 'active' : ''}
+            onClick={() => setActiveTab(period)}
+          >
+            {period.charAt(0).toUpperCase() + period.slice(1)}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <h3>Weekly Activity (Pie Chart)</h3>
-        <Pie data={generateChartData(weeklyAnalytics)} options={{ maintainAspectRatio: false }} />
+      {/* Statistics Panel */}
+<div className="statistics-panel">
+  <div className="stat-card">
+    <h4>Total Visits</h4>
+    <p>{statistics[activeTab]?.totalVisits || 0}</p>
+  </div>
+  <div className="stat-card">
+    <h4>Unique Sites</h4>
+    <p>{statistics[activeTab]?.uniqueSites || 0}</p>
+  </div>
+</div>
+
+      {/* Bar Chart Visualization */}
+      <div className="chart-container">
+        <Bar data={generateChartData(analyticsData[activeTab])} options={{ maintainAspectRatio: false }} />
+      </div>
+
+      {/* Top Websites List */}
+      <div className="top-sites">
+        <h3>Top Websites</h3>
+        <ul>
+        {analyticsData[activeTab]
+  .sort((a, b) => b.visits - a.visits)  // Sort by visits (highest to lowest)
+  .slice(0, 10)
+  .map(site => (
+            <li key={site.domain}>
+              <img src={`https://www.google.com/s2/favicons?sz=64&domain=${site.domain}`} alt="favicon" className="favicon" />
+              {site.domain} - {site.visits} visits
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
