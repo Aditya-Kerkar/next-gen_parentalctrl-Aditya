@@ -57,7 +57,7 @@ const Analytics = () => {
         {
           label: 'Number of Visits',
           data: dataValues,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          backgroundColor: 'rgba(6, 64, 43, 0.6)',
           borderWidth: 1,
         },
       ],
@@ -85,11 +85,11 @@ const Analytics = () => {
 <div className="statistics-panel">
   <div className="stat-card">
     <h4>Total Websites Visited</h4>
-    <p>{statistics[activeTab]?.totalVisits || 0}</p>
+    <p style={{ fontSize: "30px", fontWeight: "bold" }}>{statistics[activeTab]?.totalVisits || 0}</p>
   </div>
   <div className="stat-card">
     <h4>Unique Websites</h4>
-    <p>{statistics[activeTab]?.uniqueSites || 0}</p>
+    <p style={{ fontSize: "30px", fontWeight: "bold" }}>{statistics[activeTab]?.uniqueSites || 0}</p>
   </div>
 </div>
 
