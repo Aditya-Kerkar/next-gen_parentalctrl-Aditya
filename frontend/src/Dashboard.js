@@ -16,12 +16,30 @@ const Dashboard = () => {
       .then(data => setBlockedSites(data));
   }, []);
 
-  const handleBlockSite = () => {
-    if (newBlockedSite.trim() !== '') {
-      setBlockedSites([...blockedSites, { url: newBlockedSite }]); // Add new site to state
-      setNewBlockedSite(''); // Clear the input field after submission
-    }
-  };
+  useEffect(() => {
+    // Fetch blocked sites when component mounts
+    const fetchBlockedSites = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/blocked-sites');
+        if (!response.ok) {
+          throw new Error('Failed to fetch blocked sites');
+        }
+        const data = await response.json();
+        setBlockedSites(data);
+      } catch (error) {
+        console.error('Error fetching blocked sites:', error);
+      }
+    };
+
+    fetchBlockedSites();
+  }, []);
+
+  // const handleBlockSite = () => {
+  //   if (newBlockedSite.trim() !== '') {
+  //     setBlockedSites([...blockedSites, { url: newBlockedSite }]); // Add new site to state
+  //     setNewBlockedSite(''); // Clear the input field after submission
+  //   }
+  // };
 
   return (
     <div>
@@ -29,7 +47,7 @@ const Dashboard = () => {
         blockedSites={blockedSites}
         newBlockedSite={newBlockedSite}
         setNewBlockedSite={setNewBlockedSite}
-        handleBlockSite={handleBlockSite}
+        setBlockedSites={setBlockedSites}
       />
       <HistoryList browsingHistory={browsingHistory} />
     </div>

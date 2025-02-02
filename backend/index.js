@@ -97,12 +97,35 @@ app.get('/api/blocked-sites', (req, res) => {
 
 // Block a site
 app.post('/api/block-site', (req, res) => {
+  console.log('Received block site request:', req.body);
+  
   const { url } = req.body;
-  db.run('INSERT INTO blocked_sites (url) VALUES (?)', [url], (err) => {
+  
+  if (!url) {
+    console.error('No URL provided');
+    return res.status(400).json({ error: 'URL is required' });
+  }
+
+  // Add http:// if not present
+  let formattedUrl = url;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    formattedUrl = 'http://' + url;
+  }
+
+  console.log('Attempting to block URL:', formattedUrl);
+
+  db.run('INSERT INTO blocked_sites (url) VALUES (?)', [formattedUrl], function(err) {
     if (err) {
+      console.error('Error blocking site:', err.message);
       res.status(500).json({ error: err.message });
     } else {
-      res.status(200).send();
+      console.log(`Successfully blocked site with ID: ${this.lastID}`);
+      res.status(200).json({ 
+        success: true, 
+        message: 'Site blocked successfully',
+        id: this.lastID,
+        url: formattedUrl
+      });
     }
   });
 });
