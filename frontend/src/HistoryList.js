@@ -2,17 +2,19 @@ import React from 'react';
 import './App.css'; // Ensure you have the right path for CSS import
 
 const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp);
-  const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with zero if needed
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (0-11) and pad with zero
-  const year = date.getFullYear(); // Get year
-  const hours = String(date.getHours()).padStart(2, '0'); // Get hours and pad with zero
-  const minutes = String(date.getMinutes()).padStart(2, '0'); // Get minutes and pad with zero
+  const date = new Date(timestamp * 1000); // Convert UNIX timestamp (seconds) to milliseconds
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
 
-  return `Date : ${day}-${month}-${year} Time : ${hours}:${minutes}`; // Return formatted string
+  return `Date : ${day}-${month}-${year} Time : ${hours}:${minutes}`;
 };
 
+
 const HistoryList = ({ browsingHistory }) => {
+  const sortedHistory = [...browsingHistory].sort((a, b) => b.timestamp - a.timestamp);
   return (
     <div>
       <div className="logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -20,7 +22,7 @@ const HistoryList = ({ browsingHistory }) => {
         <h3>Web Activity Log</h3>
       </div>
       <div className="HistoryList-container">
-        {browsingHistory.map((history, index) => (
+        {sortedHistory.map((history, index) => (
           <div key={index} className="HistoryItem-card">
             <div className="HistoryItem-url" lines={1}>
             <b>URL <div className={`category-badge ${history.category === 'Sensitive Topics' ? 'sensitive' : ''}`}>{history.category}</div> </b>: {history.url} 
