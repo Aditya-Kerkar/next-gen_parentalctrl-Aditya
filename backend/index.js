@@ -286,7 +286,7 @@ app.put('/api/revocation-request/:id', (req, res) => {
 // Helper function to fetch category from the API 
 const fetchCategory = async (url) => {
   try {
-    const response = await fetch(`https://website-categorization.whoisxmlapi.com/api/v3?apiKey=at_pNhnXFwqpFonGVcgc2GqCeH5Z454F&url=${url}`);
+    const response = await fetch(`https://website-categorization.whoisxmlapi.com/api/v3?apiKey=at_GvCMbqcesK5KmKdRweVnUWr6p9HVq&url=${url}`);
     const data = await response.json();
     
     // Log the entire API response
